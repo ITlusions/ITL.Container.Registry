@@ -1,0 +1,33 @@
+namespace: local-registry
+
+image:
+  repository: registry
+  tag: "2"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  port: 5000
+  # Set to a real port to also expose a NodePort (useful for direct node-to-node
+  # access without going through Ingress). Leave null to skip NodePort entirely.
+  nodePort: null
+
+ingress:
+  enabled: true
+  className: itl-traefik
+  clusterIssuer: letsencrypt-issuer
+  hosts:
+    - registry.itlusions.nl
+    - registry.itlusions.com
+  tlsSecretName: registry-itlusions-nl-tls
+
+persistence:
+  # Off by default (emptyDir): images are lost on pod restart. Set enabled:true
+  # and pick a storageClass (see ITL.K8s/docs/4-storage/4.1-storage-classes.md,
+  # e.g. ha-dbs-lh) once this is meant to hold images long-term.
+  enabled: false
+  storageClassName: ""
+  size: 20Gi
+
+resources: {}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: itl-registry
+description: Plain Docker Registry v2, exposed via Ingress with a real cert
+type: application
+version: 0.1.0
+appVersion: "2"
