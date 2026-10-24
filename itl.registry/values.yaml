@@ -22,6 +22,31 @@ ingress:
     - registry.itlusions.com
   tlsSecretName: registry-itlusions-nl-tls
 
+auth:
+  # Basic auth for the whole registry (all repositories), via Docker's own
+  # htpasswd support. No per-repository rules - see README for why.
+  enabled: true
+  realm: "ITL Container Registry"
+  # Secret must have a key named "htpasswd" with a bcrypt-hashed entry. If
+  # bootstrapJob.enabled is true (default), a post-install Job creates this
+  # automatically on first `helm install` and prints the generated password
+  # to its own pod logs once - see templates/bootstrap-secret-job.yaml and
+  # `kubectl logs -n local-registry job/itl-registry-bootstrap-secret`.
+  # Manual alternative if bootstrapJob is disabled:
+  #   docker run --rm httpd:2.4-alpine htpasswd -nbB <user> <password> > htpasswd
+  #   kubectl create secret generic registry-htpasswd -n local-registry --from-file=htpasswd=htpasswd
+  secretName: registry-htpasswd
+
+  bootstrapJob:
+    # Runs once on first install only (helm.sh/hook: post-install) - never
+    # re-runs on helm upgrade, so it won't clobber a password rotated by
+    # hand afterward. Disable if you'd rather always create the Secret
+    # yourself before installing.
+    enabled: true
+
+  # Username the bootstrap Job creates the first credential for.
+  bootstrapUsername: itlusions
+
 persistence:
   # Off by default (emptyDir): images are lost on pod restart. Set enabled:true
   # and pick a storageClass (see ITL.K8s/docs/4-storage/4.1-storage-classes.md,
